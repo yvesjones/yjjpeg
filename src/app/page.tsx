@@ -52,7 +52,7 @@ export default function Home() {
 
           <div className="mx-auto max-w-7xl px-6">
             <p className="mono-label mt-2 text-center">
-              Scroll or drag to rotate &middot; click a frame to enlarge
+              Drag to rotate &middot; click a frame to enlarge
             </p>
           </div>
         </section>

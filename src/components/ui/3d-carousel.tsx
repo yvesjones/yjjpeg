@@ -88,8 +88,6 @@ const easeSoft: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
 const transition = { duration: 0.15, ease: easeOut };
 const transitionOverlay = { duration: 0.5, ease: easeOut };
 
-/** Degrees of cylinder rotation per pixel scrolled. */
-const SCROLL_ROTATION_FACTOR = 0.08;
 /** Degrees per pixel dragged. */
 const DRAG_ROTATION_FACTOR = 0.25;
 /** Pointer travel beyond this is treated as a drag, not a click. */
@@ -171,21 +169,10 @@ const Carousel = memo(function Carousel({
     frame.current = requestAnimationFrame(tick);
   }, [stopMomentum, turn]);
 
-  // Scrolling the page turns the cylinder.
+  // The cylinder turns on drag only — scrolling the page leaves it alone.
   useEffect(() => {
     apply();
-    let last = window.scrollY;
-    const onScroll = () => {
-      const y = window.scrollY;
-      const delta = y - last;
-      last = y;
-      if (!activeRef.current) return;
-      stopMomentum();
-      turn(delta * SCROLL_ROTATION_FACTOR);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [apply, turn, stopMomentum]);
+  }, [apply]);
 
   useEffect(() => {
     if (!isCarouselActive) stopMomentum();
