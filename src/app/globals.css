@@ -1,26 +1,195 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #FFFFFF;
+  --color-foreground: #0A0A0A;
+  --color-muted: #737373;
+  --color-accent: #DC2626;
+  --color-surface: #FAFAFA;
+  --color-surface-alt: #F4F4F4;
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --hairline: rgba(10, 10, 10, 0.12);
 }
 
+/* `@theme inline` inlines these into Tailwind's own utilities but never emits
+   them as custom properties, so hand-written `var(--font-*)` below would
+   resolve to nothing. next/font puts its variables on <body>, so alias them
+   here where they are in scope. */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-space-grotesk);
+  --font-mono: var(--font-jetbrains-mono);
+
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 3px;
+}
+
+/* ===========================================================
+   Type and layout system — the same voice as the music site,
+   inverted for a white ground.
+   =========================================================== */
+
+/* --- Display type ------------------------------------------------------ */
+.display {
+  font-family: var(--font-heading), system-ui, sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+}
+
+.display-hero {
+  font-size: clamp(3rem, 11vw, 9rem);
+}
+
+.display-xl {
+  font-size: clamp(2.75rem, 8vw, 7rem);
+}
+
+.display-lg {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.display-md {
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  line-height: 0.9;
+}
+
+.display-sm {
+  font-size: clamp(1.125rem, 2vw, 1.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+/* Keeps the display face but drops the uppercase, for running text. */
+.display-case {
+  text-transform: none;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* --- Monospace annotations --------------------------------------------- */
+.mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.mono-label {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.mono-readout {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.mono-eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+/* --- Hairlines ---------------------------------------------------------- */
+.hairline { border-color: var(--hairline); }
+.hairline-t { border-top: 1px solid var(--hairline); }
+.hairline-b { border-bottom: 1px solid var(--hairline); }
+
+/* --- Pill controls ------------------------------------------------------ */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 2rem;
+  border-radius: 9999px;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.pill-primary {
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+.pill-primary:hover {
+  opacity: 0.85;
+  transform: translateY(-3px);
+}
+
+.pill-secondary {
+  background: transparent;
+  color: var(--color-foreground);
+  border: 1px solid var(--hairline);
+}
+.pill-secondary:hover {
+  border-color: var(--color-foreground);
+  transform: translateY(-3px);
+}
+
+/* --- Contour field ------------------------------------------------------ */
+.topo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.topo::before {
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 300%;
+  top: -100%;
+  left: -50%;
+  background-image: repeating-radial-gradient(
+    circle at 50% 50%,
+    transparent 0,
+    transparent 40px,
+    rgba(10, 10, 10, 0.04) 41px,
+    transparent 42px
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+.topo-fade::before {
+  mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 90%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 90%);
 }
