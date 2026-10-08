@@ -1,36 +1,8 @@
-import Link from "next/link";
-
 import { ThreeDPhotoCarousel } from "@/components/ui/3d-carousel";
-
-const navLinks = [
-  { href: "#work", label: "Work" },
-  { href: "#about", label: "About" },
-  { href: "#contact", label: "Contact" },
-];
 
 export default function Home() {
   return (
     <>
-      {/* Nav */}
-      <nav className="fixed top-0 right-0 left-0 z-40 bg-background/80 backdrop-blur-md hairline-b">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="display text-xl transition-colors hover:text-accent">
-            YJJPEG
-          </Link>
-          <div className="flex items-center gap-7">
-            {navLinks.map((link) => (
-              <a
-                key={link.href}
-                href={link.href}
-                className="mono-label transition-colors hover:text-foreground"
-              >
-                {link.label}
-              </a>
-            ))}
-          </div>
-        </div>
-      </nav>
-
       <main className="pt-16">
         {/* Carousel first, so the photographs are on screen before any scroll. */}
         <section id="work" className="topo topo-fade pt-6 pb-10 sm:pt-8">
