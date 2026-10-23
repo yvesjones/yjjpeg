@@ -60,27 +60,28 @@ export function useMediaQuery(
   return matches;
 }
 
-/** Verified Unsplash photo ids — every one checked for a 200 before shipping. */
-const photoIds = [
-  "1506744038136-46273834b3fb",
-  "1470770841072-f978cf4d019e",
-  "1464822759023-fed622ff2c3b",
-  "1441974231531-c6227db76b6e",
-  "1501785888041-af3ef285b470",
-  "1433086966358-54859d0ed716",
-  "1426604966848-d7adac402bff",
-  "1444723121867-7a241cacace9",
-  "1493246507139-91e8fad9978e",
-  "1447752875215-b2761acb3c5d",
-  "1472214103451-9374bd1c798e",
-  "1418065460487-3e41a6c84dc5",
-  "1469474968028-56623f02e42e",
-  "1458668383970-8ddd3927deed",
-  "1439853949127-fa647821eba0",
+/**
+ * The hero frames — hand-picked, all landscape so the row stays uniform.
+ * Mirrors public/hero/_manifest.json, which records the source filename and
+ * folder for each so a frame can be traced back or swapped by name.
+ */
+const heroPhotos: { src: string; alt: string }[] = [
+  { src: "/hero/000002630009.png", alt: "Croatia 2026" },
+  { src: "/hero/img-3524.png", alt: "Flowers" },
+  { src: "/hero/000068150024.png", alt: "Finn" },
+  { src: "/hero/000068130031.png", alt: "Linda" },
+  { src: "/hero/000002630035.png", alt: "Croatia 2026" },
+  { src: "/hero/000081400032.png", alt: "Sky" },
+  { src: "/hero/000002630025.png", alt: "Croatia 2026" },
+  { src: "/hero/000019270003.png", alt: "Morrocco 2026" },
+  { src: "/hero/img-4058.png", alt: "Levanto / Pisa 2024" },
+  { src: "/hero/img-3516.png", alt: "Sky" },
+  { src: "/hero/img-4249.png", alt: "Cal" },
+  { src: "/hero/000018410006.png", alt: "Elcee" },
+  { src: "/hero/img-23532.png", alt: "Film Photography" },
+  { src: "/hero/img-3499-4.png", alt: "Sunsets" },
+  { src: "/hero/img-5496.png", alt: "Film Photography" },
 ];
-
-const unsplash = (id: string, w: number) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=80`;
 
 const easeOut: [number, number, number, number] = [0.32, 0.72, 0, 1];
 const easeSoft: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
@@ -92,6 +93,15 @@ const transitionOverlay = { duration: 0.5, ease: easeOut };
 const DRAG_ROTATION_FACTOR = 0.25;
 /** Pointer travel beyond this is treated as a drag, not a click. */
 const DRAG_CLICK_THRESHOLD_PX = 8;
+/**
+ * Frames are laid out this much larger than their place on the cylinder, then
+ * scaled back down by the same factor. The arrangement is identical, but the
+ * browser rasterises the image at the bigger layout size — matching what the
+ * perspective magnifies it to, instead of upscaling a small raster and
+ * softening the photo. Set to the front-card magnification,
+ * perspective / (perspective - radius).
+ */
+const OVERSAMPLE = 1.85;
 /** Per-frame velocity decay after releasing a drag. */
 const MOMENTUM_DECAY = 0.94;
 
@@ -113,7 +123,7 @@ const Carousel = memo(function Carousel({
   const isScreenSizeSm = useMediaQuery("(max-width: 640px)");
   // A wider cylinder gives both wider faces and a bigger radius, which brings
   // the front frames closer to the camera — so the photos read much larger.
-  const cylinderWidth = isScreenSizeSm ? 1600 : 3000;
+  const cylinderWidth = isScreenSizeSm ? 2560 : 4800;
   const faceCount = cards.length;
   const faceWidth = cylinderWidth / faceCount;
   const radius = cylinderWidth / (2 * Math.PI);
@@ -216,7 +226,7 @@ const Carousel = memo(function Carousel({
     <div
       className="flex h-full touch-pan-y items-center justify-center"
       style={{
-        perspective: "1000px",
+        perspective: "1700px",
         transformStyle: "preserve-3d",
       }}
     >
@@ -235,10 +245,12 @@ const Carousel = memo(function Carousel({
             key={`key-${imgUrl}-${i}`}
             className="absolute flex h-full origin-center items-center justify-center rounded-xl p-2"
             style={{
-              width: `${faceWidth}px`,
+              width: `${faceWidth * OVERSAMPLE}px`,
+              // scale() last, about the card's own centre, so it lands in the
+              // same place on the cylinder at the same apparent size.
               transform: `rotateY(${
                 i * (360 / faceCount)
-              }deg) translateZ(${radius}px)`,
+              }deg) translateZ(${radius}px) scale(${1 / OVERSAMPLE})`,
             }}
             // A flick shouldn't also count as a click on whatever ends up
             // under the cursor — but a real click jitters a few pixels, so
@@ -250,11 +262,18 @@ const Carousel = memo(function Carousel({
           >
             <motion.img
               src={imgUrl}
-              alt={`Photograph ${i + 1}`}
+              alt={heroPhotos[i]?.alt ?? `Photograph ${i + 1}`}
               layoutId={`img-${imgUrl}`}
-              className="pointer-events-none w-full rounded-xl object-cover aspect-square shadow-sm"
-              initial={{ filter: "blur(4px)" }}
-              animate={{ filter: "blur(0px)" }}
+              // No aspect-square / object-cover: the frames keep their own
+              // rectangular shape rather than being cropped to a square, which
+              // threw away a third of every 3:2 photo.
+              className="pointer-events-none block h-auto w-full rounded-xl shadow-sm"
+              // Fades in rather than un-blurring. The blur version left
+              // `filter: blur(0px)` on the element permanently, and any filter
+              // forces its own rasterised layer — which the 3D perspective
+              // then magnifies, softening the photo.
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={transition}
               draggable={false}
             />
@@ -268,7 +287,7 @@ const Carousel = memo(function Carousel({
 function ThreeDPhotoCarousel() {
   const [activeImg, setActiveImg] = useState<string | null>(null);
   const [isCarouselActive, setIsCarouselActive] = useState(true);
-  const cards = useMemo(() => photoIds.map((id) => unsplash(id, 1200)), []);
+  const cards = useMemo(() => heroPhotos.map((p) => p.src), []);
 
   const handleClick = (imgUrl: string) => {
     setActiveImg(imgUrl);
@@ -304,7 +323,11 @@ function ThreeDPhotoCarousel() {
           role="dialog"
           aria-modal="true"
           aria-label="Expanded photograph"
-          className="fixed inset-0 z-50 m-5 flex items-center justify-center rounded-3xl bg-white/90 backdrop-blur-sm md:m-24 lg:mx-[14rem]"
+          // Full-bleed scrim: no margin and no rounding, so there is no panel
+          // edge framing the photo. Inset margins previously drew a visible
+          // white box, which the page scrolling behind made obvious. Sizing
+          // moved onto the image itself, since this no longer bounds it.
+          className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm"
           style={{ willChange: "opacity" }}
           transition={transitionOverlay}
         >
@@ -312,7 +335,10 @@ function ThreeDPhotoCarousel() {
             layoutId={`img-${activeImg}`}
             src={activeImg}
             alt="Expanded photograph"
-            className="max-h-full max-w-full rounded-lg shadow-xl"
+            // Viewport units rather than max-*-full: these reproduce the
+            // enlarged size the overlay margins used to set, now that the
+            // scrim covers the whole screen.
+            className="max-h-[88vh] max-w-[92vw] rounded-lg shadow-xl"
             initial={{ scale: 0.5 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.5, duration: 0.5, ease: easeSoft }}
