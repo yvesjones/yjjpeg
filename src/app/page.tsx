@@ -1,3 +1,4 @@
+import ContactForm from "@/components/ContactForm";
 import { ThreeDPhotoCarousel } from "@/components/ui/3d-carousel";
 
 export default function Home() {
@@ -37,7 +38,7 @@ export default function Home() {
               <span className="block">Jones</span>
             </h1>
             <p className="mono mt-8 max-w-xl text-sm leading-relaxed text-muted">
-              Photography. Landscape, architecture, and the spaces in between.
+              Blending Music and Photography
             </p>
           </div>
         </section>
@@ -72,14 +73,15 @@ export default function Home() {
             <p className="mono-eyebrow mb-4">Contact</p>
             <h2 className="display display-lg">Work with me</h2>
             <p className="mono mt-6 text-sm leading-relaxed text-muted">
-              Commissions, prints, and editorial enquiries.
+              Commissions &amp; enquiries
             </p>
-            <div className="mt-10 flex flex-wrap justify-center gap-3">
-              <a href="mailto:yvesjonesmusic@gmail.com" className="pill pill-primary">
-                Email
-              </a>
+            <div className="mt-12">
+              <ContactForm />
+            </div>
+
+            <div className="hairline-t mt-14 pt-10">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/yvesjoness/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="pill pill-secondary"
