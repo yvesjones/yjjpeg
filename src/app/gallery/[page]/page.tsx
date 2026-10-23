@@ -1,12 +1,22 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import CollectionPlayer from "@/components/CollectionPlayer";
 import InstagramCard from "@/components/InstagramCard";
 import MorphGallery from "@/components/ui/morph-gallery";
-import { collections, getCollectionByPage, totalPages } from "@/data/gallery";
+import { getPublishedCollections } from "@/lib/gallery-store";
 
-/** One static route per collection. */
-export function generateStaticParams() {
+/**
+ * Re-read the collections at most once a minute, so publishing from /admin
+ * shows up without a redeploy.
+ */
+export const revalidate = 60;
+
+/** Pages added after a build still render, rather than 404. */
+export const dynamicParams = true;
+
+export async function generateStaticParams() {
+  const collections = await getPublishedCollections();
   return collections.map((_, i) => ({ page: String(i + 1) }));
 }
 
@@ -20,8 +30,11 @@ export default async function GalleryPage({
 
   if (!Number.isInteger(page) || page < 1) notFound();
 
-  const collection = getCollectionByPage(page);
+  const collections = await getPublishedCollections();
+  const collection = collections[page - 1];
   if (!collection) notFound();
+
+  const totalPages = collections.length;
 
   const prev = page > 1 ? page - 1 : null;
   const next = page < totalPages ? page + 1 : null;
@@ -44,10 +57,21 @@ export default async function GalleryPage({
             </div>
           </div>
 
-          <h1 className="display display-xl">{collection.title}</h1>
-          <p className="mono mt-6 max-w-xl text-sm leading-relaxed text-muted">
-            {collection.blurb}
-          </p>
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <h1 className="display display-xl">{collection.title}</h1>
+              <p className="mono mt-6 max-w-xl text-sm leading-relaxed text-muted">
+                {collection.blurb}
+              </p>
+            </div>
+
+            {collection.music && (
+              <CollectionPlayer
+                music={collection.music}
+                collection={collection.title}
+              />
+            )}
+          </div>
         </div>
       </section>
 
@@ -94,7 +118,6 @@ export default async function GalleryPage({
                     <MorphGallery
                       items={frames}
                       height="100%"
-                      autoplay={5000}
                       fit="contain"
                       background={[0.957, 0.957, 0.957]}
                       drift={0.18}
