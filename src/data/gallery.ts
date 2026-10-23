@@ -16,6 +16,12 @@ export interface Collection {
   date: string;
   instagram: InstagramPost;
   /**
+   * The music this set is paired with. Shown as a player beside the title, so
+   * a collection reads as a scene rather than a contact sheet. Omit and the
+   * page simply renders without one.
+   */
+  music?: CollectionMusic;
+  /**
    * The photos not on Instagram — the draw. Split by orientation so each gets
    * a slide shaped to suit it, rather than one box that letterboxes whichever
    * orientation it wasn't built for.
@@ -25,6 +31,36 @@ export interface Collection {
     portrait: MorphItem[];
   };
 }
+
+/**
+ * The music paired with a collection — either a released track on Spotify, or
+ * a file hosted here.
+ *
+ * Use `source: "file"` for unreleased material: it plays from this site, so
+ * there is something on the page that exists nowhere else. Drop the audio in
+ * `public/audio/` and point `src` at it (see public/audio/README.md).
+ *
+ * Use `source: "spotify"` for anything already out. `embed` is the embed URL,
+ * not the share link: take https://open.spotify.com/album/<ID> and insert
+ * `/embed` after the domain. Albums and single tracks both work; leave the
+ * query string off, the player adds it.
+ */
+export type CollectionMusic =
+  | {
+      source: "file";
+      /** Path under `public`, e.g. "/audio/berlin-demo.mp3". */
+      src: string;
+      title: string;
+      artist: string;
+      /** Small line above the title — "Unreleased", "Demo", "Rough mix". */
+      note?: string;
+    }
+  | {
+      source: "spotify";
+      embed: string;
+      title: string;
+      artist: string;
+    };
 
 export interface InstagramPost {
   /** Permalink. Empty string marks a drafted placeholder, not a live post. */
@@ -68,6 +104,12 @@ export const collections: Collection[] = [
       "Three days on 35mm. The post got four frames — these are the rest of the roll.",
     location: "Berlin, DE",
     date: "2026",
+    music: {
+      source: "spotify",
+      embed: "https://open.spotify.com/embed/album/3VX46XMco0fSHMzGgrEoTl",
+      title: "Between Hello & Goodbye",
+      artist: "Fieves",
+    },
     instagram: {
       permalink: "",
       cover: "/gallery/berlin-2026/portrait/1.jpg",
@@ -87,6 +129,12 @@ export const collections: Collection[] = [
     blurb:
       "An ongoing roll. Whatever the sky was doing, wherever I happened to be.",
     date: "2021–2026",
+    music: {
+      source: "spotify",
+      embed: "https://open.spotify.com/embed/track/2fLVQsDmPoU1kaT9s9Z9H0",
+      title: "Streetlights",
+      artist: "Yves Jones",
+    },
     instagram: {
       permalink: "",
       cover: "/gallery/sunsets/landscape/1.jpg",

@@ -193,3 +193,63 @@ h1, h2, h3, h4, h5, h6 {
   mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 90%);
   -webkit-mask-image: linear-gradient(to bottom, black 0%, black 45%, transparent 90%);
 }
+
+/* Scrub bar for AudioPlayer. The track is painted with a gradient at
+   `--progress` rather than a second element, so the filled part moves without
+   a layout pass. Both engines' thumb pseudo-elements have to be styled
+   separately — they do not accept a shared selector. */
+.audio-scrub {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.audio-scrub::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--color-foreground) var(--progress, 0%),
+    var(--hairline) var(--progress, 0%)
+  );
+}
+
+.audio-scrub::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--color-foreground) var(--progress, 0%),
+    var(--hairline) var(--progress, 0%)
+  );
+}
+
+.audio-scrub::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.audio-scrub::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+.audio-scrub:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.audio-scrub:focus-visible::-webkit-slider-thumb {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
