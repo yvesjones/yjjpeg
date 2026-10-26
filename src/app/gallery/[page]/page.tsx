@@ -2,8 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import CollectionPlayer from "@/components/CollectionPlayer";
-import InstagramCard from "@/components/InstagramCard";
-import MorphGallery from "@/components/ui/morph-gallery";
+import GallerySlide from "@/components/GallerySlide";
 import { getPublishedCollections } from "@/lib/gallery-store";
 
 /**
@@ -57,30 +56,31 @@ export default async function GalleryPage({
             </div>
           </div>
 
-          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <h1 className="display display-xl">{collection.title}</h1>
-              <p className="mono mt-6 max-w-xl text-sm leading-relaxed text-muted">
-                {collection.blurb}
-              </p>
-            </div>
+          <h1 className="display display-xl">{collection.title}</h1>
+          <p className="mono mt-6 max-w-xl text-sm leading-relaxed text-muted">
+            {collection.blurb}
+          </p>
+        </div>
+      </section>
 
+      {/* Soundtrack on the left, the photographs on the right. It stays put
+          while the frames scroll, so the music keeps the set company. */}
+      <section className="px-6 pb-10">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-start">
+          <div className="lg:sticky lg:top-24">
+            {/* Stands in for the slide's label row opposite, so the device's
+                top edge lines up with the top of the landscape frames. Same
+                classes, so it keeps that row's exact height. */}
+            <p className="mono-eyebrow mb-3 hidden lg:block lg:invisible" aria-hidden="true">
+              Soundtrack
+            </p>
             {collection.music && (
               <CollectionPlayer
                 music={collection.music}
                 collection={collection.title}
+                cover={collection.instagram.cover}
               />
             )}
-          </div>
-        </div>
-      </section>
-
-      {/* Post on the left, the photos that didn't make it on the right. */}
-      <section className="px-6 pb-10">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-start">
-          <div className="lg:sticky lg:top-24">
-            <p className="mono-eyebrow mb-4">The post</p>
-            <InstagramCard post={collection.instagram} title={collection.title} />
           </div>
 
           <div className="space-y-10">
@@ -93,38 +93,11 @@ export default async function GalleryPage({
               if (frames.length === 0) return null;
 
               return (
-                <div key={orientation}>
-                  <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-                    <p className="mono-eyebrow">
-                      Not on Instagram &middot; {orientation} &middot;{" "}
-                      {frames.length}{" "}
-                      {frames.length === 1 ? "frame" : "frames"}
-                    </p>
-                    {frames.length > 1 && (
-                      <p className="mono-label">Drag or use the arrows</p>
-                    )}
-                  </div>
-                  {/* The box takes the orientation's own aspect ratio, so the
-                      frames very nearly fill it and the letterbox all but
-                      disappears. The portrait box is also width-capped, or the
-                      column would stretch it back into a near-square. */}
-                  <div
-                    className={
-                      orientation === "landscape"
-                        ? "aspect-[3/2] w-full"
-                        : "mx-auto aspect-[2/3] w-full max-w-[470px]"
-                    }
-                  >
-                    <MorphGallery
-                      items={frames}
-                      height="100%"
-                      fit="contain"
-                      background={[0.957, 0.957, 0.957]}
-                      drift={0.18}
-                      className="rounded-2xl"
-                    />
-                  </div>
-                </div>
+                <GallerySlide
+                  key={orientation}
+                  items={frames}
+                  orientation={orientation}
+                />
               );
             })}
           </div>
