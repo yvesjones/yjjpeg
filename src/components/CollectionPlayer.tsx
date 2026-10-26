@@ -1,43 +1,62 @@
-import AudioPlayer from "@/components/AudioPlayer";
+import Ipod from "@/components/ipod/Ipod";
 import type { CollectionMusic } from "@/data/gallery";
+import type { PlayerTrack } from "@/lib/itunes";
 
 /**
- * The soundtrack for a collection, shown beside the title.
+ * A collection's soundtrack, as an iPod showing that one track.
  *
- * Unreleased tracks play from a file hosted here; released ones hand off to
- * Spotify's own iframe, which handles previews, full playback for logged-in
- * listeners, and keeps the play on the release rather than stranding it in a
- * local copy.
+ * The track comes straight from the collection's `music` field, so changing
+ * the audio in /admin changes what this plays — there is nothing to keep in
+ * step by hand.
+ *
+ * An uploaded file plays here. A Spotify release cannot: an embed is not an
+ * audio file, so the device shows the track and the play button opens Spotify
+ * instead of pretending to play it.
  */
 export default function CollectionPlayer({
   music,
   collection,
+  cover,
 }: {
   music: CollectionMusic;
   collection: string;
+  /** Collection cover, used as the album art on screen. */
+  cover?: string;
 }) {
+  const isFile = music.source === "file";
+
+  const track: PlayerTrack = {
+    id: collection,
+    title: music.title,
+    artist: music.artist,
+    album: isFile && music.note ? music.note : collection,
+    preview: isFile ? music.src : "",
+    externalUrl: isFile ? undefined : spotifyLink(music.embed),
+    artwork: cover ?? "",
+    year: "",
+  };
+
   return (
-    <div className="w-full shrink-0 lg:w-[360px]">
-      <p className="mono-eyebrow mb-3">Soundtrack</p>
-      {music.source === "file" ? (
-        <AudioPlayer
-          src={music.src}
-          title={music.title}
-          artist={music.artist}
-          note={music.note}
-        />
-      ) : (
-        <iframe
-          src={`${music.embed}?utm_source=generator&theme=0`}
-          title={`${music.title} by ${music.artist} — soundtrack to ${collection}`}
-          width="100%"
-          height={152}
-          loading="lazy"
-          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-          className="block rounded-xl"
-          style={{ border: 0 }}
-        />
-      )}
-    </div>
+    <Ipod
+      name={collection}
+      menu={[
+        {
+          label: music.title,
+          marker: "note",
+          action: "track",
+          trackIndex: 0,
+        },
+      ]}
+      tracks={[track]}
+      startInPlayer
+      screenTitle="Soundtrack"
+      note={isFile ? "" : "Play on Spotify"}
+      widthClass="w-[min(100%,260px)]"
+    />
   );
+}
+
+/** The embed URL points at the player; this points at the release itself. */
+function spotifyLink(embed: string): string {
+  return embed.replace("/embed/", "/");
 }

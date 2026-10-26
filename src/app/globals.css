@@ -253,3 +253,120 @@ h1, h2, h3, h4, h5, h6 {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
 }
+
+/* ---------------------------------------------------------------------------
+   iPod (the /links bio page)
+
+   Scoped to .ipod-page so the device's cream palette never leaks into the
+   dark site around it. Sizes inside the device are proportional (%, clamp,
+   em) rather than fixed, so the whole thing scales from a 320px phone up to
+   a desktop without a second layout.
+   --------------------------------------------------------------------------- */
+.ipod-page {
+  background: #0A0A0A;
+}
+
+/* The palette lives on the device, not the page, so a second iPod dropped
+   into the dark home page carries its own colours with it. */
+/* The device's sizing context. Everything inside is measured in cqw — a share
+   of the device's own width — so the same component reads correctly at any
+   size, and its padding no longer depends on how wide its parent happens to
+   be (percentage padding resolves against the parent, which crushed the
+   screen wherever the parent was wider than the device). */
+.ipod-frame {
+  container-type: inline-size;
+}
+
+.ipod-body {
+  --ipod-body: #F2EFE6;
+  --ipod-body-edge: #DAD5C7;
+  --ipod-wheel: #EDEAE0;
+  --ipod-wheel-ink: #6B6558;
+  --ipod-centre: #F6F4EC;
+  --ipod-bezel: #2A2724;
+  --lcd: #B9B9B1;
+  --lcd-ink: #2A2724;
+  --lcd-bar: #3A3631;
+  --lcd-bar-ink: #F2EFE6;
+  background: linear-gradient(
+    180deg,
+    var(--ipod-body) 0%,
+    var(--ipod-body) 70%,
+    var(--ipod-body-edge) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 18px 50px rgba(0, 0, 0, 0.55);
+}
+
+.ipod-bezel {
+  background: var(--ipod-bezel);
+}
+
+/* The bitmap face, with a real fallback stack — a pixel font that fails to
+   load must not drop the menu to a serif. */
+.ipod-type {
+  font-family: var(--font-silkscreen), ui-monospace, "SFMono-Regular",
+    Menlo, monospace;
+  letter-spacing: 0.02em;
+}
+
+/* A slow hover for the home page's iPod, so it reads as floating over the
+   hero rather than sitting on it. */
+@keyframes ipod-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+.ipod-float {
+  animation: ipod-float 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ipod-float { animation: none; }
+}
+
+/* The home page's iPod sits half out of frame in the corner of the carousel
+   section, and rises when the pointer reaches it. The section's overflow does
+   the hiding, so nothing is drawn over the content below. */
+@media (min-width: 768px) {
+  .ipod-peek {
+    transform: translateY(46%);
+    transition: transform 450ms cubic-bezier(0.22, 0.8, 0.2, 1);
+    will-change: transform;
+  }
+
+  .ipod-peek:hover,
+  /* Keyboard users reach the controls without a pointer. */
+  .ipod-peek:focus-within {
+    transform: translateY(0);
+  }
+}
+
+/* A touch screen has no hover to reveal it with, so it is never hidden there. */
+@media (hover: none) {
+  .ipod-peek {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ipod-peek {
+    transition: none;
+  }
+}
+
+/* Fades a photograph in as it replaces the one before it in the full-screen
+   viewer, so frames dissolve rather than cut. */
+@keyframes photo-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ipod-fade-in {
+  animation: photo-fade-in 450ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ipod-fade-in { animation: none; }
+}
