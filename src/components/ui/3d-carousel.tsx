@@ -111,19 +111,59 @@ const MOMENTUM_DECAY = 0.94;
  * (rotateY, x, scale…), so a `transform` string MotionValue never reaches the
  * DOM, and its drag handling writes a competing transform of its own.
  */
+function CarouselArrow({
+  side,
+  onPress,
+}: {
+  side: "left" | "right";
+  onPress: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={side === "left" ? "Previous photograph" : "Next photograph"}
+      // The cylinder listens for pointerdown to start a drag; without this a
+      // tap on the arrow would also begin one.
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={onPress}
+      style={{ transform: "translate3d(0, -50%, 0)", willChange: "transform" }}
+      className={`absolute top-1/2 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-[var(--hairline)] bg-background/85 text-foreground shadow-md backdrop-blur-sm transition-opacity active:opacity-60 md:hidden ${
+        side === "left" ? "left-3" : "right-3"
+      }`}
+    >
+      <span aria-hidden="true" className="text-lg leading-none">
+        {side === "left" ? "\u2039" : "\u203a"}
+      </span>
+    </button>
+  );
+}
+
 const Carousel = memo(function Carousel({
   handleClick,
   cards,
   isCarouselActive,
+  stepRef,
 }: {
   handleClick: (imgUrl: string, index: number) => void;
   cards: string[];
   isCarouselActive: boolean;
+  /**
+   * Published upward so the arrows can live outside this component. They have
+   * to: everything in here shares a `preserve-3d` context, where z-index is
+   * ignored and painting order follows 3D position — the frames are pushed
+   * towards the camera by translateZ, so any button in here sits behind them.
+   */
+  stepRef?: React.MutableRefObject<((direction: 1 | -1) => void) | null>;
 }) {
   const isScreenSizeSm = useMediaQuery("(max-width: 640px)");
   // A wider cylinder gives both wider faces and a bigger radius, which brings
   // the front frames closer to the camera — so the photos read much larger.
-  const cylinderWidth = isScreenSizeSm ? 2560 : 4800;
+  //
+  // On a phone the front frame lands at roughly (width / faces) × perspective
+  // / (perspective − radius): 3500 puts it near 350px of a 375px screen, where
+  // 2560 left it at 225px adrift in white space. It stays under OVERSAMPLE, so
+  // the frames are still drawn larger than they are shown and nothing softens.
+  const cylinderWidth = isScreenSizeSm ? 3500 : 4800;
   const faceCount = cards.length;
   const faceWidth = cylinderWidth / faceCount;
   const radius = cylinderWidth / (2 * Math.PI);
@@ -163,6 +203,52 @@ const Carousel = memo(function Carousel({
     }
     velocity.current = 0;
   }, []);
+
+  /**
+   * Turn by exactly one photograph.
+   *
+   * Drag is lovely with a thumb but imprecise, so a phone gets arrows too.
+   * The cards sit at i x (360 / faceCount), so advancing one means turning
+   * the cylinder back by that same step.
+   */
+  const stepBy = useCallback(
+    (direction: 1 | -1) => {
+      stopMomentum();
+      const perFace = 360 / faceCount;
+      const from = angle.current;
+      const to = from - direction * perFace;
+
+      const reduced =
+        typeof window !== "undefined" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) {
+        angle.current = to;
+        apply();
+        return;
+      }
+
+      const startedAt = performance.now();
+      const span = 420;
+      const ease = (t: number) => 1 - Math.pow(1 - t, 3);
+
+      const tick = () => {
+        const t = Math.min((performance.now() - startedAt) / span, 1);
+        angle.current = from + (to - from) * ease(t);
+        apply();
+        frame.current = t < 1 ? requestAnimationFrame(tick) : null;
+      };
+      frame.current = requestAnimationFrame(tick);
+    },
+    [apply, faceCount, stopMomentum],
+  );
+
+  useEffect(() => {
+    if (!stepRef) return;
+    stepRef.current = stepBy;
+    return () => {
+      stepRef.current = null;
+    };
+  }, [stepRef, stepBy]);
 
   // Glide to a stop after a flick.
   const startMomentum = useCallback(() => {
@@ -224,12 +310,13 @@ const Carousel = memo(function Carousel({
 
   return (
     <div
-      className="flex h-full touch-pan-y items-center justify-center"
+      className="relative flex h-full touch-pan-y items-center justify-center"
       style={{
         perspective: "1700px",
         transformStyle: "preserve-3d",
       }}
     >
+
       <div
         ref={cylinderRef}
         className="relative flex h-full origin-center cursor-grab justify-center select-none active:cursor-grabbing"
@@ -287,6 +374,7 @@ const Carousel = memo(function Carousel({
 function ThreeDPhotoCarousel() {
   const [activeImg, setActiveImg] = useState<string | null>(null);
   const [isCarouselActive, setIsCarouselActive] = useState(true);
+  const stepRef = useRef<((direction: 1 | -1) => void) | null>(null);
   const cards = useMemo(() => heroPhotos.map((p) => p.src), []);
 
   const handleClick = (imgUrl: string) => {
@@ -347,11 +435,24 @@ function ThreeDPhotoCarousel() {
         </motion.div>
       )}
       <div className="relative h-[460px] w-full overflow-hidden sm:h-[620px]">
-        <Carousel
-          handleClick={handleClick}
-          cards={cards}
-          isCarouselActive={isCarouselActive}
-        />
+        {/* `isolate` confines the 3D scene to its own stacking context. Without
+            it WebKit promotes the translateZ'd frames to composited layers that
+            paint above later siblings whatever their z-index, which left the
+            arrows stuck behind the photographs on iOS while Chromium ordered
+            them correctly. */}
+        <div className="absolute inset-0 isolate">
+          <Carousel
+            handleClick={handleClick}
+            cards={cards}
+            isCarouselActive={isCarouselActive}
+            stepRef={stepRef}
+          />
+        </div>
+
+        {/* Phones only: a thumb can drag the cylinder, but tapping through it
+            one photograph at a time is far easier one-handed. */}
+        <CarouselArrow side="left" onPress={() => stepRef.current?.(-1)} />
+        <CarouselArrow side="right" onPress={() => stepRef.current?.(1)} />
       </div>
     </div>
   );
