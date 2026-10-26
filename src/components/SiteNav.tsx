@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 const navLinks = [
-  { href: "/", label: "Home" },
+  // The wordmark is already a link home, so on a narrow screen this one is
+  // dropped rather than letting four links collide with it.
+  { href: "/", label: "Home", wideOnly: true },
   { href: "/gallery", label: "Gallery" },
   { href: "/#about", label: "About" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/contact", label: "Contact" },
 ];
 
 /**
@@ -18,16 +20,18 @@ export default function SiteNav() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link
           href="/"
-          className="display text-xl transition-colors hover:text-accent"
+          className="display shrink-0 text-lg transition-colors hover:text-accent sm:text-xl"
         >
-          YJJPEG
+          YJ.JPEG
         </Link>
-        <div className="flex items-center gap-7">
+        <div className="flex items-center gap-4 sm:gap-7">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="mono-label transition-colors hover:text-foreground"
+              className={`mono-label whitespace-nowrap transition-colors hover:text-foreground${
+                link.wideOnly ? " hidden sm:inline" : ""
+              }`}
             >
               {link.label}
             </Link>

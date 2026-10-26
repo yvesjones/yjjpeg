@@ -65,7 +65,7 @@ export async function POST(request: Request) {
       subject: `[${typeLabel}] ${subject}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #333;">New enquiry from YJJPEG</h2>
+          <h2 style="color: #333;">New enquiry from YJ.JPEG</h2>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 8px 12px; font-weight: bold; color: #555; vertical-align: top;">Name</td>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { Inter, Space_Grotesk, JetBrains_Mono, Silkscreen } from "next/font/google";
 import "./globals.css";
 import SiteNav from "@/components/SiteNav";
 
@@ -18,13 +18,20 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+/** The iPod's bitmap face, in the spirit of Chicago. */
+const silkscreen = Silkscreen({
+  variable: "--font-silkscreen",
+  weight: ["400", "700"],
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "YJJPEG | Photography by Yves Jones",
+  title: "YJ.JPEG | Photography by Yves Jones",
   description:
     "Photography by Yves Jones. Landscape, architecture, and street work from the UK and beyond.",
   keywords: ["Yves Jones", "photography", "photographer", "landscape", "architecture", "street"],
   openGraph: {
-    title: "YJJPEG | Photography by Yves Jones",
+    title: "YJ.JPEG | Photography by Yves Jones",
     description: "Photography by Yves Jones.",
     type: "website",
   },
@@ -38,7 +45,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${inter.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable} ${silkscreen.variable} antialiased`}
       >
         <SiteNav />
         {children}
