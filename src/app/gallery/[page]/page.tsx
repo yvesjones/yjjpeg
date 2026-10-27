@@ -19,6 +19,20 @@ export async function generateStaticParams() {
   return collections.map((_, i) => ({ page: String(i + 1) }));
 }
 
+/**
+ * A slash in a title or location is a line break, not a character to print:
+ * "Vancouver/Seattle 2024" sets as two lines, as does "Vancouver, CA /
+ * Seattle, US". The stored value keeps the slash, so it still reads as one
+ * name in the admin list, in alt text and anywhere else it is quoted.
+ */
+function splitOnSlash(value: string | undefined): string[] {
+  if (!value) return [];
+  return value
+    .split("/")
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 export default async function GalleryPage({
   params,
 }: {
@@ -51,12 +65,20 @@ export default async function GalleryPage({
               <span>YJ_GALLERY</span>
             </div>
             <div className="mono-readout text-right leading-relaxed">
-              {collection.location && <div>{collection.location}</div>}
+              {splitOnSlash(collection.location).map((part) => (
+                <div key={part}>{part}</div>
+              ))}
               <div>{collection.date}</div>
             </div>
           </div>
 
-          <h1 className="display display-xl">{collection.title}</h1>
+          <h1 className="display display-xl">
+            {splitOnSlash(collection.title).map((line) => (
+              <span key={line} className="block">
+                {line}
+              </span>
+            ))}
+          </h1>
           <p className="mono mt-6 max-w-xl text-sm leading-relaxed text-muted">
             {collection.blurb}
           </p>
