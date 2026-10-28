@@ -43,3 +43,6 @@ next-env.d.ts
 
 # claude code local settings
 .claude/settings.local.json
+
+# Promo images for social posts — not part of the site build.
+promo/

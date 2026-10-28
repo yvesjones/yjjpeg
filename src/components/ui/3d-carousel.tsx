@@ -62,25 +62,27 @@ export function useMediaQuery(
 
 /**
  * The hero frames — hand-picked, all landscape so the row stays uniform.
+ * WebP rather than PNG: these are photographs, and lossless PNG cost 26MB on
+ * every first visit for no visible gain at the size they are drawn.
  * Mirrors public/hero/_manifest.json, which records the source filename and
  * folder for each so a frame can be traced back or swapped by name.
  */
 const heroPhotos: { src: string; alt: string }[] = [
-  { src: "/hero/000002630009.png", alt: "Croatia 2026" },
-  { src: "/hero/img-3524.png", alt: "Flowers" },
-  { src: "/hero/000068150024.png", alt: "Finn" },
-  { src: "/hero/000068130031.png", alt: "Linda" },
-  { src: "/hero/000002630035.png", alt: "Croatia 2026" },
-  { src: "/hero/000081400032.png", alt: "Sky" },
-  { src: "/hero/000002630025.png", alt: "Croatia 2026" },
-  { src: "/hero/000019270003.png", alt: "Morrocco 2026" },
-  { src: "/hero/img-4058.png", alt: "Levanto / Pisa 2024" },
-  { src: "/hero/img-3516.png", alt: "Sky" },
-  { src: "/hero/img-4249.png", alt: "Cal" },
-  { src: "/hero/000018410006.png", alt: "Elcee" },
-  { src: "/hero/img-23532.png", alt: "Film Photography" },
-  { src: "/hero/img-3499-4.png", alt: "Sunsets" },
-  { src: "/hero/img-5496.png", alt: "Film Photography" },
+  { src: "/hero/000002630009.webp", alt: "Croatia 2026" },
+  { src: "/hero/img-3524.webp", alt: "Flowers" },
+  { src: "/hero/000068150024.webp", alt: "Finn" },
+  { src: "/hero/000068130031.webp", alt: "Linda" },
+  { src: "/hero/000002630035.webp", alt: "Croatia 2026" },
+  { src: "/hero/000081400032.webp", alt: "Sky" },
+  { src: "/hero/000002630025.webp", alt: "Croatia 2026" },
+  { src: "/hero/000019270003.webp", alt: "Morrocco 2026" },
+  { src: "/hero/img-4058.webp", alt: "Levanto / Pisa 2024" },
+  { src: "/hero/img-3516.webp", alt: "Sky" },
+  { src: "/hero/img-4249.webp", alt: "Cal" },
+  { src: "/hero/000018410006.webp", alt: "Elcee" },
+  { src: "/hero/img-23532.webp", alt: "Film Photography" },
+  { src: "/hero/img-3499-4.webp", alt: "Sunsets" },
+  { src: "/hero/img-5496.webp", alt: "Film Photography" },
 ];
 
 const easeOut: [number, number, number, number] = [0.32, 0.72, 0, 1];
