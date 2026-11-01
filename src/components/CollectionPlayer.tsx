@@ -51,7 +51,7 @@ export default function CollectionPlayer({
       startInPlayer
       screenTitle="Soundtrack"
       note={isFile ? "" : "Play on Spotify"}
-      widthClass="w-[min(100%,260px)]"
+      widthClass="w-[min(100%,210px)]"
     />
   );
 }

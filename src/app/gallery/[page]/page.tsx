@@ -85,26 +85,11 @@ export default async function GalleryPage({
         </div>
       </section>
 
-      {/* Soundtrack on the left, the photographs on the right. It stays put
-          while the frames scroll, so the music keeps the set company. */}
+      {/* Photographs on the left, the soundtrack on the right. The device
+          stays put while the frames scroll, so the music keeps the set
+          company. */}
       <section className="px-6 pb-10">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[minmax(0,380px)_minmax(0,1fr)] lg:items-start">
-          <div className="lg:sticky lg:top-24">
-            {/* Stands in for the slide's label row opposite, so the device's
-                top edge lines up with the top of the landscape frames. Same
-                classes, so it keeps that row's exact height. */}
-            <p className="mono-eyebrow mb-3 hidden lg:block lg:invisible" aria-hidden="true">
-              Soundtrack
-            </p>
-            {collection.music && (
-              <CollectionPlayer
-                music={collection.music}
-                collection={collection.title}
-                cover={collection.instagram.cover}
-              />
-            )}
-          </div>
-
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,260px)] lg:items-start">
           <div className="space-y-10">
             {/* Two slides rather than one. A single box has to letterbox
                 whichever orientation it wasn't shaped for; giving each its own
@@ -122,6 +107,22 @@ export default async function GalleryPage({
                 />
               );
             })}
+          </div>
+
+          <div className="lg:sticky lg:top-24">
+            {/* Stands in for the slide's label row opposite, so the device's
+                top edge lines up with the top of the landscape frames. Same
+                classes, so it keeps that row's exact height. */}
+            <p className="mono-eyebrow mb-3 hidden lg:block lg:invisible" aria-hidden="true">
+              Soundtrack
+            </p>
+            {collection.music && (
+              <CollectionPlayer
+                music={collection.music}
+                collection={collection.title}
+                cover={collection.instagram.cover}
+              />
+            )}
           </div>
         </div>
       </section>
