@@ -5,6 +5,9 @@ import * as React from "react";
 /** Degrees of rotation per menu step. Roughly a real wheel's detent. */
 const DEGREES_PER_STEP = 22;
 
+/** Movement beyond this is a turn of the wheel rather than a press. */
+const DRAG_SLOP_PX = 6;
+
 /**
  * The click wheel.
  *
@@ -34,6 +37,15 @@ export default function ClickWheel({
   const ringRef = React.useRef<HTMLDivElement>(null);
   const lastAngle = React.useRef<number | null>(null);
   const carry = React.useRef(0);
+  /**
+   * Whether this gesture turned the wheel.
+   *
+   * The four labelled buttons and the centre cover nearly the whole ring, so
+   * if they swallow the gesture only the diagonal slivers between them can
+   * start a turn — which is why so many swipes read as presses. They let the
+   * drag through instead, and ignore their own click if the finger travelled.
+   */
+  const dragged = React.useRef(false);
 
   const angleFrom = (e: PointerEvent | React.PointerEvent) => {
     const ring = ringRef.current;
@@ -47,6 +59,8 @@ export default function ClickWheel({
   const onPointerDown = (e: React.PointerEvent) => {
     lastAngle.current = angleFrom(e);
     carry.current = 0;
+    dragged.current = false;
+    const from = { x: e.clientX, y: e.clientY };
 
     const move = (ev: PointerEvent) => {
       const now = angleFrom(ev);
@@ -60,6 +74,12 @@ export default function ClickWheel({
 
       lastAngle.current = now;
       carry.current += delta;
+
+      // Distance, not angle: near the centre a tiny movement sweeps a large
+      // angle, which would mark a stationary tap as a turn.
+      if (Math.hypot(ev.clientX - from.x, ev.clientY - from.y) > DRAG_SLOP_PX) {
+        dragged.current = true;
+      }
 
       while (Math.abs(carry.current) >= DEGREES_PER_STEP) {
         const direction = carry.current > 0 ? 1 : -1;
@@ -89,6 +109,7 @@ export default function ClickWheel({
     >
       <WheelButton
         label="Menu"
+        dragged={dragged}
         onClick={onMenu}
         className="top-0 left-1/2 h-[26%] w-[46%] -translate-x-1/2 pt-[6%]"
       >
@@ -99,6 +120,7 @@ export default function ClickWheel({
 
       <WheelButton
         label="Previous"
+        dragged={dragged}
         onClick={onPrev}
         className="top-1/2 left-0 h-[46%] w-[26%] -translate-y-1/2 pl-[6%]"
       >
@@ -107,6 +129,7 @@ export default function ClickWheel({
 
       <WheelButton
         label="Next"
+        dragged={dragged}
         onClick={onNext}
         className="top-1/2 right-0 h-[46%] w-[26%] -translate-y-1/2 pr-[6%]"
       >
@@ -115,6 +138,7 @@ export default function ClickWheel({
 
       <WheelButton
         label="Play or pause"
+        dragged={dragged}
         onClick={onPlayPause}
         className="bottom-0 left-1/2 h-[26%] w-[46%] -translate-x-1/2 pb-[6%]"
       >
@@ -123,11 +147,11 @@ export default function ClickWheel({
 
       <button
         type="button"
-        onClick={onSelect}
+        onClick={() => {
+          if (!dragged.current) onSelect();
+        }}
         aria-label="Select"
-        // Stops a tap on the centre from also spinning the ring underneath.
-        onPointerDown={(e) => e.stopPropagation()}
-        className="absolute top-1/2 left-1/2 h-[38%] w-[38%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--ipod-centre)] shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_1px_4px_rgba(0,0,0,0.2)] active:shadow-[inset_0_2px_5px_rgba(0,0,0,0.18)]"
+        className="absolute top-1/2 left-1/2 h-[38%] w-[38%] touch-none -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--ipod-centre)] shadow-[inset_0_1px_2px_rgba(255,255,255,0.8),0_1px_4px_rgba(0,0,0,0.2)] active:shadow-[inset_0_2px_5px_rgba(0,0,0,0.18)]"
       />
     </div>
   );
@@ -144,11 +168,14 @@ function Glyph({ children }: { children: React.ReactNode }) {
 function WheelButton({
   label,
   onClick,
+  dragged,
   className,
   children,
 }: {
   label: string;
   onClick: () => void;
+  /** Set while the ring is turning; a turn must not also press. */
+  dragged: React.RefObject<boolean>;
   className: string;
   children: React.ReactNode;
 }) {
@@ -156,9 +183,13 @@ function WheelButton({
     <button
       type="button"
       aria-label={label}
-      onClick={onClick}
-      onPointerDown={(e) => e.stopPropagation()}
-      className={`absolute flex items-center justify-center text-[var(--ipod-wheel-ink)] transition-opacity active:opacity-50 ${className}`}
+      onClick={() => {
+        if (!dragged.current) onClick();
+      }}
+      // touch-none here too: touch-action is not inherited, so without it iOS
+      // treats a drag starting on a button as a page gesture and cancels the
+      // pointer stream — no movement is seen, and the release reads as a tap.
+      className={`absolute flex touch-none items-center justify-center text-[var(--ipod-wheel-ink)] transition-opacity active:opacity-50 ${className}`}
     >
       {children}
     </button>
