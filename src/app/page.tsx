@@ -101,7 +101,10 @@ export default async function Home() {
                             {collection.title}
                           </span>
                         </span>
-                        <span className="mono-label shrink-0 text-right">
+                        {/* Not shrink-0: "Vancouver, CA / Seattle, US · 2024"
+                            then refuses to narrow and forces the row — and so
+                            the whole document — wider than a phone screen. */}
+                        <span className="mono-label text-right">
                           {collection.location
                             ? `${collection.location} · ${collection.date}`
                             : collection.date}

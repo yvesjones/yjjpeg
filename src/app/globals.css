@@ -370,3 +370,14 @@ h1, h2, h3, h4, h5, h6 {
 @media (prefers-reduced-motion: reduce) {
   .ipod-fade-in { animation: none; }
 }
+
+/* The carousel's frames are 3D-transformed, and a 3D-transformed box is not
+   contained by an ancestor's `overflow: hidden` — they spilled past the
+   viewport and left the whole document pannable sideways on a phone, so a
+   swipe sometimes dragged the page instead of turning the carousel.
+   `clip` rather than `hidden`: it stops the sideways scroll without making
+   the element a scroll container, which would break `position: sticky`
+   further down the gallery page. */
+html {
+  overflow-x: clip;
+}
