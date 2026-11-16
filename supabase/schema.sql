@@ -40,3 +40,23 @@ drop trigger if exists gallery_collections_touch on public.gallery_collections;
 create trigger gallery_collections_touch
   before update on public.gallery_collections
   for each row execute function public.touch_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- Storage: the "gallery" bucket
+--
+-- Bucket settings live in the project, not in SQL, so they are recorded here
+-- rather than applied by running this file. Set them in Storage → gallery →
+-- Configuration, or with the management API:
+--
+--   file_size_limit:     52428800   (50MB — the plan ceiling; larger is
+--                                    rejected with EntityTooLarge)
+--   allowed_mime_types:  image/jpeg, image/png, image/webp, image/avif,
+--                        audio/mpeg, audio/mp4, audio/aac, audio/x-m4a,
+--                        audio/wav, audio/wave, audio/x-wav, audio/vnd.wave,
+--                        audio/x-pn-wav, audio/flac, audio/x-flac,
+--                        audio/aiff, audio/x-aiff
+--
+-- The several spellings of WAV are deliberate: browsers disagree about which
+-- one a .wav carries, and a type that is not on the list is refused with a
+-- 415 the browser only sees as a bare status code. Keep this list in step with
+-- EXTENSIONS in src/app/api/admin/upload-url/route.ts.

@@ -744,7 +744,10 @@ function Editor({
                   )}
                   <input
                     type="file"
-                    accept="audio/*"
+                    // The extensions are listed as well as the wildcard: a
+                    // Finder sheet filtering on "audio/*" alone has been known
+                    // to grey out a .wav whose type the OS did not resolve.
+                    accept="audio/*,.wav,.wave,.aif,.aiff,.flac,.mp3,.m4a"
                     className="text-xs"
                     onChange={(e) =>
                       void uploadOne(e.target.files?.[0], (url) =>
@@ -755,6 +758,11 @@ function Editor({
                       )
                     }
                   />
+                  <p className="mt-2 text-xs text-muted">
+                    WAV, AIFF, FLAC, MP3 or M4A, up to 50MB. WAV is around
+                    10MB a minute, so a long track may need a 16-bit 44.1kHz
+                    export — or an MP3 alongside the master.
+                  </p>
                 </div>
               </>
             )}

@@ -9,9 +9,14 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Kept in step with the storage bucket's own allowed_mime_types: a file that
+// clears this check and is then refused by storage is the harder failure to
+// read, since the browser only sees a status code from a signed URL.
 const EXTENSIONS = new Set([
   "jpg", "jpeg", "png", "webp", "avif",
-  "mp3", "m4a", "aac", "wav",
+  "mp3", "m4a", "aac",
+  // Lossless, for unreleased material mastered straight from the session.
+  "wav", "wave", "aif", "aiff", "flac",
 ]);
 
 /**
